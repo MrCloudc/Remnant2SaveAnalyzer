@@ -1,0 +1,30 @@
+yaml
+name: Build Remnant2SaveAnalyzer
+
+on: [workflow_dispatch] # Ermöglicht das manuelle Starten
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Repository auschecken
+      uses: actions/checkout@v4
+
+    - name: .NET SDK einrichten
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x' # Projekt benötigt .NET 8.0
+
+    - name: Abhängigkeiten wiederherstellen
+      run: dotnet restore Remnant2SaveAnalyzer.sln
+
+    - name: EXE kompilieren
+      run: |
+        dotnet publish Remnant2SaveAnalyzer.sln -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true
+
+    - name: EXE als Download bereitstellen
+      uses: actions/upload-artifact@v4
+      with:
+        name: Remnant2SaveAnalyzer-Windows
+        path: "**/publish/*.exe"
